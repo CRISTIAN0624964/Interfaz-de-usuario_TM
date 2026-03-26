@@ -1,0 +1,97 @@
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical"
+    android:padding="16dp"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <EditText
+        android:id="@+id/editTextCantidad"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="Ingrese cantidad"
+        android:inputType="numberDecimal"/>
+
+    <Spinner
+        android:id="@+id/spinnerOrigen"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"/>
+
+    <Spinner
+        android:id="@+id/spinnerDestino"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"/>
+
+    <Button
+        android:id="@+id/btnConvertir"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Convertir"/>
+
+</LinearLayout>
+
+package com.cristian.moneda
+
+import android.os.Bundle
+import android.widget.*
+import androidx.appcompat.app.AppCompatActivity
+
+class MainActivity : AppCompatActivity() {
+
+    private lateinit var editTextCantidad: EditText
+    private lateinit var spinnerOrigen: Spinner
+    private lateinit var spinnerDestino: Spinner
+    private lateinit var btnConvertir: Button
+
+    private val monedas = arrayOf(
+        "USD", "PEN", "EUR", "GBP", "INR", "BRL", "MXN", "CNY", "JPY"
+    )
+
+    // Tasas base respecto a USD
+    private val tasas = mapOf(
+        "USD" to 1.0,
+        "PEN" to 3.65,
+        "EUR" to 0.92,
+        "GBP" to 0.78,
+        "INR" to 83.0,
+        "BRL" to 5.0,
+        "MXN" to 17.0,
+        "CNY" to 7.2,
+        "JPY" to 150.0
+    )
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        setContentView(R.layout.activity_main)
+
+        editTextCantidad = findViewById(R.id.editTextCantidad)
+        spinnerOrigen = findViewById(R.id.spinnerOrigen)
+        spinnerDestino = findViewById(R.id.spinnerDestino)
+        btnConvertir = findViewById(R.id.btnConvertir)
+
+        val adapter = ArrayAdapter(this, android.R.layout.simple_spinner_item, monedas)
+        spinnerOrigen.adapter = adapter
+        spinnerDestino.adapter = adapter
+
+        btnConvertir.setOnClickListener {
+            convertir()
+        }
+    }
+
+    private fun convertir() {
+        val cantidad = editTextCantidad.text.toString().toDoubleOrNull()
+
+        if (cantidad == null || cantidad <= 0) {
+            Toast.makeText(this, "Ingrese valor válido", Toast.LENGTH_SHORT).show()
+            return
+        }
+
+        val origen = spinnerOrigen.selectedItem.toString()
+        val destino = spinnerDestino.selectedItem.toString()
+
+        val enUSD = cantidad / tasas[origen]!!
+        val resultado = enUSD * tasas[destino]!!
+
+        Toast.makeText(this, "Resultado: %.2f $destino".format(resultado), Toast.LENGTH_LONG).show()
+    }
+}
